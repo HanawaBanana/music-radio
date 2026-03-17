@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoFi 电台 - 放松学习工作</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #1a1625;
+            --bg-gradient: linear-gradient(135deg, #1a1625 0%, #2d2640 50%, #1a1625 100%);
+            --text-color: #e8e4f0;
+            --accent-color: #a78bfa;
+            --accent-hover: #c4b5fd;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --card-hover: rgba(255, 255, 255, 0.12);
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-color);
+            overflow: hidden;
+        }
+
+        /* 动态背景 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 80%, rgba(167, 139, 250, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(167, 139, 250, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.08) 0%, transparent 30%);
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(-2%, -2%) rotate(1deg); }
+        }
+
+        /* 浮动音符 */
+        .notes-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .note {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.15;
+            animation: noteFloat 15s linear infinite;
+        }
+
+        @keyframes noteFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.15; }
+            90% { opacity: 0.15; }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 主容器 */
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Logo */
+        .logo {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #a78bfa, #f0abfc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.7;
+            margin-bottom: 40px;
+        }
+
+        /* 播放器卡片 */
+        .player-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 32px 40px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .station-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .station-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .station-desc {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            margin-bottom: 24px;
+        }
+
+        /* 控制按钮 */
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .btn {
+            background: var(--accent-color);
+            color: #1a1625;
+            border: none;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.1);
+        }
+
+        .btn.playing {
+            animation: playingPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes playingPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(167, 139, 250, 0); }
+        }
+
+        .btn-small {
+            width: 40px;
+            height: 40px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+        }
+
+        .btn-small:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* 音量控制 */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
+        }
+
+        /* 状态显示 */
+        .status {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            opacity: 0.5;
+        }
+
+        .status.playing {
+            opacity: 1;
+            color: var(--accent-color);
+        }
+
+        /* 电台列表 */
+        .station-list {
+            margin-top: 40px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .station-btn {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .station-btn:hover {
+            background: var(--card-hover);
+            border-color: var(--accent-color);
+        }
+
+        .station-btn.active {
+            background: var(--accent-color);
+            color: #1a1625;
+            border-color: var(--accent-color);
+        }
+
+        /* 页脚 */
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            font-size: 0.8rem;
+            opacity: 0.4;
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .logo { font-size: 2rem; }
+            .player-card { padding: 24px; }
+            .station-icon { font-size: 48px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 动态背景 -->
+    <div class="bg-animation"></div>
+
+    <!-- 浮动音符 -->
+    <div class="notes-container" id="notes"></div>
+
+    <div class="container">
+        <h1 class="logo">🎧 LoFi 电台</h1>
+        <p class="tagline">放松 · 学习 · 工作</p>
+
+        <div class="player-card">
+            <div class="station-icon" id="stationIcon">☕</div>
+            <h2 class="station-name" id="stationName">LoFi 咖啡馆</h2>
+            <p class="station-desc" id="stationDesc">轻松舒缓的节拍，陪伴你的每一次专注</p>
+
+            <div class="controls">
+                <button class="btn btn-small" id="prevBtn">⏮</button>
+                <button class="btn" id="playBtn">▶</button>
+                <button class="btn btn-small" id="nextBtn">⏭</button>
+            </div>
+
+            <div class="volume-control">
+                <span>🔈</span>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                <span>🔊</span>
+            </div>
+
+            <div class="status" id="status">点击播放开始收听</div>
+        </div>
+
+        <div class="station-list" id="stationList"></div>
+    </div>
+
+    <div class="footer">🎵 用音乐陪伴你的每一天</div>
+
+    <script>
+        // 电台列表 - 使用国内可用的流媒体源
+        const stations = [
+            {
+                name: "LoFi 咖啡馆",
+                desc: "轻松舒缓的节拍，陪伴你的每一次专注",
+                icon: "☕",
+                // 使用公开的 lofi 流媒体
+                url: "https://streams.ilovemusic.de/iloveradio17.mp3",
+                fallback: "https://stream.zeno.fm/f3wvbbqmdg8uv"
+            },
+            {
+                name: "夜间 LoFi",
+                desc: "深夜工作学习的最佳陪伴",
+                icon: "🌙",
+                url: "https://streams.ilovemusic.de/iloveradio2.mp3",
+                fallback: "https://stream.zeno.fm/0r0xa792kwzuv"
+            },
+            {
+                name: "工作专注",
+                desc: "提高效率的轻音乐",
+                icon: "📚",
+                url: "https://streams.ilovemusic.de/iloveradio17.mp3",
+                fallback: "https://stream.zeno.fm/4d6bhken6g8uv"
+            },
+            {
+                name: "放松冥想",
+                desc: "放空思绪，享受当下",
+                icon: "🧘",
+                url: "https://streams.ilovemusic.de/iloveradio2.mp3",
+                fallback: "https://stream.zeno.fm/5n6d6y1dxg8uv"
+            }
+        ];
+
+        let currentStation = 0;
+        let isPlaying = false;
+        let audio = new Audio();
+        audio.volume = 0.7;
+
+        // DOM 元素
+        const playBtn = document.getElementById('playBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const stationName = document.getElementById('stationName');
+        const stationDesc = document.getElementById('stationDesc');
+        const stationIcon = document.getElementById('stationIcon');
+        const status = document.getElementById('status');
+        const stationList = document.getElementById('stationList');
+        const notesContainer = document.getElementById('notes');
+
+        // 初始化电台列表
+        function initStationList() {
+            stationList.innerHTML = '';
+            stations.forEach((station, index) => {
+                const btn = document.createElement('button');
+                btn.className = `station-btn ${index === currentStation ? 'active' : ''}`;
+                btn.textContent = station.name;
+                btn.onclick = () => switchStation(index);
+                stationList.appendChild(btn);
+            });
+        }
+
+        // 切换电台
+        function switchStation(index) {
+            currentStation = index;
+            updateStationInfo();
+            initStationList();
+            if (isPlaying) {
+                loadAndPlay();
+            }
+        }
+
+        // 更新电台信息
+        function updateStationInfo() {
+            const station = stations[currentStation];
+            stationName.textContent = station.name;
+            stationDesc.textContent = station.desc;
+            stationIcon.textContent = station.icon;
+        }
+
+        // 加载并播放
+        function loadAndPlay() {
+            const station = stations[currentStation];
+            audio.src = station.url;
+            audio.play().then(() => {
+                isPlaying = true;
+                updatePlayState();
+            }).catch(err => {
+                // 尝试备用源
+                console.log('尝试备用源...');
+                audio.src = station.fallback;
+                audio.play().then(() => {
+                    isPlaying = true;
+                    updatePlayState();
+                }).catch(e => {
+                    status.textContent = '播放失败，请检查网络连接';
+                    status.classList.remove('playing');
+                });
+            });
+        }
+
+        // 更新播放状态
+        function updatePlayState() {
+            if (isPlaying) {
+                playBtn.textContent = '⏸';
+                playBtn.classList.add('playing');
+                status.textContent = '正在播放';
+                status.classList.add('playing');
+            } else {
+                playBtn.textContent = '▶';
+                playBtn.classList.remove('playing');
+                status.textContent = '已暂停';
+                status.classList.remove('playing');
+            }
+        }
+
+        // 播放/暂停
+        playBtn.onclick = () => {
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                if (audio.src) {
+                    audio.play();
+                } else {
+                    loadAndPlay();
+                    return;
+                }
+                isPlaying = true;
+            }
+            updatePlayState();
+        };
+
+        // 上一台
+        prevBtn.onclick = () => {
+            currentStation = (currentStation - 1 + stations.length) % stations.length;
+            switchStation(currentStation);
+        };
+
+        // 下一台
+        nextBtn.onclick = () => {
+            currentStation = (currentStation + 1) % stations.length;
+            switchStation(currentStation);
+        };
+
+        // 音量控制
+        volumeSlider.oninput = (e) => {
+            audio.volume = e.target.value / 100;
+        };
+
+        // 监听播放结束/错误
+        audio.onended = () => {
+            isPlaying = false;
+            updatePlayState();
+        };
+
+        audio.onerror = () => {
+            status.textContent = '加载失败，尝试切换其他电台';
+            status.classList.remove('playing');
+            isPlaying = false;
+            updatePlayState();
+        };
+
+        // 创建浮动音符
+        function createNotes() {
+            const notes = ['♪', '♫', '♬', '🎵', '🎶'];
+            for (let i = 0; i < 15; i++) {
+                const note = document.createElement('div');
+                note.className = 'note';
+                note.textContent = notes[Math.floor(Math.random() * notes.length)];
+                note.style.left = Math.random() * 100 + '%';
+                note.style.animationDelay = Math.random() * 15 + 's';
+                note.style.animationDuration = (15 + Math.random() * 10) + 's';
+                notesContainer.appendChild(note);
+            }
+        }
+
+        // 自动播放（需要用户交互）
+        document.addEventListener('click', function initAudio() {
+            if (!audio.src) {
+                loadAndPlay();
+                isPlaying = true;
+                updatePlayState();
+            }
+            document.removeEventListener('click', initAudio);
+        }, { once: true });
+
+        // 初始化
+        initStationList();
+        updateStationInfo();
+        createNotes();
+        volumeSlider.value = 70;
+    </script>
+</body>
+</html>
