@@ -455,9 +455,163 @@
             border: none;
         }
 
+        /* 音频可视化频谱柱 */
+        .visualizer {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 4px;
+            height: 48px;
+            margin-bottom: 20px;
+        }
+
+        .visualizer .bar {
+            width: 6px;
+            height: 8px;
+            background: linear-gradient(to top, var(--accent-warm), var(--accent));
+            border-radius: 3px;
+            transition: height 0.1s ease;
+        }
+
+        .player.playing .visualizer .bar {
+            animation: equalizer 0.8s ease-in-out infinite;
+        }
+
+        .player.playing .visualizer .bar:nth-child(1) { animation-delay: 0.0s; }
+        .player.playing .visualizer .bar:nth-child(2) { animation-delay: 0.1s; }
+        .player.playing .visualizer .bar:nth-child(3) { animation-delay: 0.2s; }
+        .player.playing .visualizer .bar:nth-child(4) { animation-delay: 0.15s; }
+        .player.playing .visualizer .bar:nth-child(5) { animation-delay: 0.25s; }
+        .player.playing .visualizer .bar:nth-child(6) { animation-delay: 0.05s; }
+        .player.playing .visualizer .bar:nth-child(7) { animation-delay: 0.18s; }
+
+        @keyframes equalizer {
+            0%, 100% { height: 8px; opacity: 0.6; }
+            25% { height: 28px; opacity: 1; }
+            50% { height: 16px; opacity: 0.8; }
+            75% { height: 36px; opacity: 1; }
+        }
+
+        /* 播放器背景光晕 */
+        .player-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.8s ease, background 0.8s ease;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .player.playing .player-glow {
+            opacity: 1;
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        .player.error .player-glow {
+            opacity: 0.6;
+            background: radial-gradient(circle, rgba(100, 120, 150, 0.4) 0%, transparent 70%);
+        }
+
+        .player.error .visualizer .bar {
+            height: 8px;
+            opacity: 0.4;
+            animation: none;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+        }
+
+        /* 白噪音控制区 */
+        .noise-container {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .noise-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .noise-types {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .noise-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .noise-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .noise-btn.active {
+            background: rgba(232, 197, 71, 0.2);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .noise-volume {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .noise-slider {
+            -webkit-appearance: none;
+            width: 80px;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .noise-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .noise-slider::-moz-range-thumb {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+        }
+
         /* 状态指示 */
         .status {
-            margin-top: 24px;
+            margin-top: 20px;
             font-size: 0.8rem;
             color: var(--text-muted);
             display: flex;
@@ -485,13 +639,11 @@
             50% { opacity: 0.5; }
         }
 
-        /* 电台选择 */
+        /* 电台选择 - 网格布局 */
         .stations {
-            margin-top: 50px;
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
             animation: fadeInUp 1s ease-out 0.4s backwards;
         }
 
@@ -499,16 +651,17 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             color: var(--text-secondary);
-            padding: 14px 24px;
-            border-radius: 16px;
+            padding: 14px 16px;
+            border-radius: 14px;
             cursor: pointer;
             font-family: 'Outfit', sans-serif;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 400;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             gap: 8px;
+            text-align: left;
         }
 
         .station-btn:hover {
@@ -525,8 +678,114 @@
         }
 
         .station-btn .icon {
-            font-size: 1.1em;
+            font-size: 1.2em;
         }
+
+        /* 环境音网格 */
+        .ambient-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            animation: fadeInUp 1s ease-out 0.4s backwards;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .ambient-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 14px 10px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 400;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .ambient-btn:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        .ambient-btn.active {
+            background: rgba(232, 197, 71, 0.15);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .ambient-btn .icon {
+            font-size: 1.5em;
+        }
+
+        /* 音量控制 - 居中优化 */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+        }
+
+        .volume-icon {
+            font-size: 16px;
+            color: var(--text-muted);
+            transition: color 0.3s;
+        }
+
+        .volume-container:hover .volume-icon {
+            color: var(--text-secondary);
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            width: 120px;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .volume-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.3);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+            border: none;
+        }
+
+        /* 移除旧的进度条和噪音相关样式 */
+        .progress-container { display: none; }
+        .visualizer { display: none; }
+        .noise-container { display: none; }
+        .player-glow { display: none; }
 
         /* 页脚 */
         .footer {
@@ -541,8 +800,20 @@
         /* 响应式 */
         @media (max-width: 480px) {
             .player {
-                padding: 36px 24px;
+                padding: 32px 20px;
                 border-radius: 24px;
+            }
+
+            .stations {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .ambient-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .volume-slider {
+                width: 60px;
             }
 
             .album-art {
@@ -620,16 +891,6 @@
                 <p class="track-artist" id="trackArtist">轻松舒缓的节拍，陪伴你的每一次专注</p>
             </div>
 
-            <div class="progress-container">
-                <div class="progress-bar" id="progressBar">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="time-display">
-                    <span id="currentTime">0:00</span>
-                    <span id="duration">LIVE</span>
-                </div>
-            </div>
-
             <div class="controls">
                 <button class="btn btn-control" id="prevBtn">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -648,9 +909,22 @@
                 </button>
             </div>
 
+            <!-- 电台列表 -->
+            <div class="stations" id="stations"></div>
+
+            <!-- 环境音网格 -->
+            <div class="ambient-grid" id="ambientGrid"></div>
+
+            <!-- 音量控制 -->
             <div class="volume-container">
-                <span class="volume-icon">🔈</span>
+                <span class="volume-icon">📻</span>
                 <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                <span class="volume-icon">🔊</span>
+            </div>
+
+            <div class="volume-container" style="margin-top: 10px;">
+                <span class="volume-icon">🌙</span>
+                <input type="range" class="volume-slider" id="ambientVolumeSlider" min="0" max="100" value="30">
                 <span class="volume-icon">🔊</span>
             </div>
 
@@ -659,9 +933,6 @@
                 <span id="statusText">点击播放开始收听</span>
             </div>
         </div>
-
-        <!-- 电台选择 -->
-        <div class="stations" id="stations"></div>
     </div>
 
     <footer class="footer">
@@ -669,101 +940,101 @@
     </footer>
 
     <script>
-        // 电台列表
-        const stations = [
-            {
-                name: "咖啡馆",
-                desc: "轻松舒缓的节拍",
-                icon: "☕",
-                url: "https://streams.ilovemusic.de/iloveradio17.mp3",
-                fallback: "https://stream.zeno.fm/f3wvbbqmdg8uv"
-            },
-            {
-                name: "深夜",
-                desc: "深夜工作学习",
-                icon: "🌙",
-                url: "https://streams.ilovemusic.de/iloveradio2.mp3",
-                fallback: "https://stream.zeno.fm/0r0xa792kwzuv"
-            },
-            {
-                name: "读书",
-                desc: "提高效率轻音乐",
-                icon: "📖",
-                url: "https://streams.ilovemusic.de/iloveradio17.mp3",
-                fallback: "https://stream.zeno.fm/4d6bhken6g8uv"
-            },
-            {
-                name: "冥想",
-                desc: "放空思绪当下",
-                icon: "🧘",
-                url: "https://streams.ilovemusic.de/iloveradio2.mp3",
-                fallback: "https://stream.zeno.fm/5n6d6y1dxg8uv"
-            }
+        // ========== 电台列表 ==========
+        const radios = [
+            { name: "咖啡馆", desc: "轻松舒缓的节拍", icon: "☕", url: "https://streams.ilovemusic.de/iloveradio17.mp3", fallback: "https://stream.zeno.fm/f3wvbbqmdg8uv" },
+            { name: "深夜", desc: "深夜工作学习", icon: "🌙", url: "https://streams.ilovemusic.de/iloveradio2.mp3", fallback: "https://stream.zeno.fm/0r0xa792kwzuv" },
+            { name: "读书", desc: "提高效率轻音乐", icon: "📖", url: "https://streams.ilovemusic.de/iloveradio17.mp3", fallback: "https://stream.zeno.fm/4d6bhken6g8uv" },
+            { name: "冥想", desc: "放空思绪当下", icon: "🧘", url: "https://streams.ilovemusic.de/iloveradio2.mp3", fallback: "https://stream.zeno.fm/5n6d6y1dxg8uv" }
         ];
 
-        let currentStation = 0;
-        let isPlaying = false;
+        // ========== 环境音列表 ==========
+        const ambients = [
+            { name: "海浪", icon: "🌊", type: "waves" },
+            { name: "下雨", icon: "🌧️", type: "rain" },
+            { name: "森林", icon: "🌲", type: "forest" },
+            { name: "篝火", icon: "🔥", type: "fire" },
+            { name: "风声", icon: "💨", type: "wind" },
+            { name: "蝉鸣", icon: "🦗", type: "cicada" },
+            { name: "咖啡馆", icon: "☕", type: "cafe" },
+            { name: "夜晚", icon: "🌙", type: "night" }
+        ];
+
+        // ========== 状态变量 ==========
+        let currentRadioIndex = 0;
+        let currentAmbientIndex = -1; // -1 表示未开启
+        let isRadioPlaying = false;
+        let isAmbientPlaying = false;
         let audio = new Audio();
         audio.volume = 0.7;
 
-        // DOM 元素
+        // Web Audio API
+        let noiseContext = null;
+        let noiseNode = null;
+        let noiseGain = null;
+
+        // ========== DOM 元素 ==========
         const player = document.getElementById('player');
         const playBtn = document.getElementById('playBtn');
         const playIcon = document.getElementById('playIcon');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         const volumeSlider = document.getElementById('volumeSlider');
+        const ambientVolumeSlider = document.getElementById('ambientVolumeSlider');
         const trackTitle = document.getElementById('trackTitle');
         const trackArtist = document.getElementById('trackArtist');
         const albumIcon = document.getElementById('albumIcon');
         const status = document.getElementById('status');
         const statusText = document.getElementById('statusText');
         const stationsContainer = document.getElementById('stations');
-        const progressFill = document.getElementById('progressFill');
-        const progressBar = document.getElementById('progressBar');
+        const ambientGrid = document.getElementById('ambientGrid');
 
-        // 初始化电台列表
-        function initStations() {
+        // ========== 电台列表渲染 ==========
+        function initRadios() {
             stationsContainer.innerHTML = '';
-            stations.forEach((station, index) => {
+            radios.forEach((radio, index) => {
                 const btn = document.createElement('button');
-                btn.className = `station-btn ${index === currentStation ? 'active' : ''}`;
-                btn.innerHTML = `<span class="icon">${station.icon}</span>${station.name}`;
-                btn.onclick = () => switchStation(index);
+                btn.className = `station-btn ${index === currentRadioIndex ? 'active' : ''}`;
+                btn.innerHTML = `<span class="icon">${radio.icon}</span>${radio.name}`;
+                btn.onclick = () => toggleRadio(index);
                 stationsContainer.appendChild(btn);
             });
         }
 
-        // 切换电台
-        function switchStation(index) {
-            currentStation = index;
-            updateStationInfo();
-            initStations();
-            if (isPlaying) {
-                loadAndPlay();
+        // ========== 环境音列表渲染 ==========
+        function initAmbients() {
+            ambientGrid.innerHTML = '';
+            ambients.forEach((ambient, index) => {
+                const btn = document.createElement('button');
+                btn.className = `ambient-btn ${index === currentAmbientIndex ? 'active' : ''}`;
+                btn.innerHTML = `<span class="icon">${ambient.icon}</span>${ambient.name}`;
+                btn.onclick = () => toggleAmbient(index);
+                ambientGrid.appendChild(btn);
+            });
+        }
+
+        // ========== 电台功能 ==========
+        function toggleRadio(index) {
+            currentRadioIndex = index;
+            initRadios();
+            updateInfo();
+
+            if (isRadioPlaying) {
+                playRadio();
             }
         }
 
-        // 更新电台信息
-        function updateStationInfo() {
-            const station = stations[currentStation];
-            trackTitle.textContent = `LoFi · ${station.name}`;
-            trackArtist.textContent = station.desc;
-            albumIcon.textContent = station.icon;
-        }
-
-        // 加载并播放
-        function loadAndPlay() {
-            const station = stations[currentStation];
-            audio.src = station.url;
+        function playRadio() {
+            const radio = radios[currentRadioIndex];
+            audio.src = radio.url;
             audio.play().then(() => {
-                isPlaying = true;
+                isRadioPlaying = true;
                 updatePlayState();
             }).catch(err => {
                 console.log('尝试备用源...');
-                audio.src = station.fallback;
+                audio.src = radio.fallback;
                 audio.play().then(() => {
-                    isPlaying = true;
+                    isRadioPlaying = true;
                     updatePlayState();
                 }).catch(e => {
                     statusText.textContent = '播放失败，请检查网络';
@@ -772,82 +1043,317 @@
             });
         }
 
-        // 更新播放状态
+        function stopRadio() {
+            audio.pause();
+            audio.src = '';
+            isRadioPlaying = false;
+        }
+
+        // ========== 环境音功能 ==========
+        function toggleAmbient(index) {
+            if (currentAmbientIndex === index) {
+                // 关闭当前环境音
+                stopAmbient();
+                currentAmbientIndex = -1;
+            } else {
+                // 切换到新的环境音
+                stopAmbient();
+                currentAmbientIndex = index;
+                initAmbients();
+                // 直接开始播放
+                playAmbient(index);
+            }
+            updateInfo();
+        }
+
+        function playAmbient(index) {
+            const type = ambients[index].type;
+
+            noiseContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            // 浏览器策略：需要用户交互后才能播放
+            if (noiseContext.state === 'suspended') {
+                noiseContext.resume();
+            }
+
+            noiseGain = noiseContext.createGain();
+            noiseGain.connect(noiseContext.destination);
+            noiseGain.gain.value = ambientVolumeSlider.value / 100;
+
+            switch(type) {
+                case 'waves': createWavesSound(); break;
+                case 'rain': createRainSound(); break;
+                case 'forest': createForestSound(); break;
+                case 'fire': createFireSound(); break;
+                case 'wind': createWindSound(); break;
+                case 'cicada': createCicadaSound(); break;
+                case 'cafe': createCafeSound(); break;
+                case 'night': createNightSound(); break;
+            }
+
+            isAmbientPlaying = true;
+            updatePlayState();
+        }
+
+        function stopAmbient() {
+            if (noiseNode) {
+                try { noiseNode.stop(); } catch(e) {}
+                noiseNode.disconnect();
+            }
+            if (noiseContext) {
+                noiseContext.close();
+            }
+            noiseNode = null;
+            noiseContext = null;
+            noiseGain = null;
+            isAmbientPlaying = false;
+        }
+
+        // 环境音生成函数
+        function createWavesSound() {
+            const bufferSize = 2 * noiseContext.sampleRate;
+            const buffer = noiseContext.createBuffer(1, bufferSize, noiseContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const wave = Math.sin(i / 5000) * 0.5 + 0.5;
+                output[i] = (Math.random() * 2 - 1) * wave * 0.3;
+            }
+            noiseNode = noiseContext.createBufferSource();
+            noiseNode.buffer = buffer;
+            noiseNode.loop = true;
+            const lowpass = noiseContext.createBiquadFilter();
+            lowpass.type = 'lowpass';
+            lowpass.frequency.value = 800;
+            noiseNode.connect(lowpass);
+            lowpass.connect(noiseGain);
+            noiseNode.start();
+        }
+
+        function createRainSound() {
+            const bufferSize = 2 * noiseContext.sampleRate;
+            const buffer = noiseContext.createBuffer(1, bufferSize, noiseContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            noiseNode = noiseContext.createBufferSource();
+            noiseNode.buffer = buffer;
+            noiseNode.loop = true;
+            const highpass = noiseContext.createBiquadFilter();
+            highpass.type = 'highpass';
+            highpass.frequency.value = 1000;
+            const lowpass = noiseContext.createBiquadFilter();
+            lowpass.type = 'lowpass';
+            lowpass.frequency.value = 8000;
+            noiseNode.connect(highpass);
+            highpass.connect(lowpass);
+            lowpass.connect(noiseGain);
+            noiseNode.start();
+        }
+
+        function createForestSound() {
+            const bufferSize = 2 * noiseContext.sampleRate;
+            const buffer = noiseContext.createBuffer(1, bufferSize, noiseContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const mod = Math.sin(i / 8000) * 0.3 + 0.7;
+                output[i] = (Math.random() * 2 - 1) * mod * 0.15;
+            }
+            noiseNode = noiseContext.createBufferSource();
+            noiseNode.buffer = buffer;
+            noiseNode.loop = true;
+            const lowpass = noiseContext.createBiquadFilter();
+            lowpass.type = 'lowpass';
+            lowpass.frequency.value = 2000;
+            noiseNode.connect(lowpass);
+            lowpass.connect(noiseGain);
+            noiseNode.start();
+        }
+
+        function createFireSound() {
+            const bufferSize = 2 * noiseContext.sampleRate;
+            const buffer = noiseContext.createBuffer(1, bufferSize, noiseContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const crackle = Math.random() > 0.98 ? (Math.random() - 0.5) * 2 : 0;
+                const base = (Math.random() * 2 - 1) * 0.1;
+                output[i] = base + crackle * 0.5;
+            }
+            noiseNode = noiseContext.createBufferSource();
+            noiseNode.buffer = buffer;
+            noiseNode.loop = true;
+            const lowpass = noiseContext.createBiquadFilter();
+            lowpass.type = 'lowpass';
+            lowpass.frequency.value = 1500;
+            noiseNode.connect(lowpass);
+            lowpass.connect(noiseGain);
+            noiseNode.start();
+        }
+
+        function createWindSound() {
+            const bufferSize = 2 * noiseContext.sampleRate;
+            const buffer = noiseContext.createBuffer(1, bufferSize, noiseContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const gust = Math.sin(i / 3000) * Math.sin(i / 7000);
+                output[i] = (Math.random() * 2 - 1) * (gust * 0.3 + 0.2);
+            }
+            noiseNode = noiseContext.createBufferSource();
+            noiseNode.buffer = buffer;
+            noiseNode.loop = true;
+            const lowpass = noiseContext.createBiquadFilter();
+            lowpass.type = 'lowpass';
+            lowpass.frequency.value = 500;
+            noiseNode.connect(lowpass);
+            lowpass.connect(noiseGain);
+            noiseNode.start();
+        }
+
+        function createCicadaSound() {
+            const bufferSize = 2 * noiseContext.sampleRate;
+            const buffer = noiseContext.createBuffer(1, bufferSize, noiseContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const cicada = Math.sin(i * 0.05) * Math.sin(i * 0.003);
+                output[i] = (Math.random() * 2 - 1) * 0.2 + cicada * 0.3;
+            }
+            noiseNode = noiseContext.createBufferSource();
+            noiseNode.buffer = buffer;
+            noiseNode.loop = true;
+            const bandpass = noiseContext.createBiquadFilter();
+            bandpass.type = 'bandpass';
+            bandpass.frequency.value = 3000;
+            bandpass.Q.value = 2;
+            noiseNode.connect(bandpass);
+            bandpass.connect(noiseGain);
+            noiseNode.start();
+        }
+
+        function createCafeSound() {
+            const bufferSize = 2 * noiseContext.sampleRate;
+            const buffer = noiseContext.createBuffer(1, bufferSize, noiseContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const chatter = Math.sin(i / 2000) * 0.2;
+                output[i] = (Math.random() * 2 - 1) * 0.15 + chatter;
+            }
+            noiseNode = noiseContext.createBufferSource();
+            noiseNode.buffer = buffer;
+            noiseNode.loop = true;
+            const lowpass = noiseContext.createBiquadFilter();
+            lowpass.type = 'lowpass';
+            lowpass.frequency.value = 1000;
+            noiseNode.connect(lowpass);
+            lowpass.connect(noiseGain);
+            noiseNode.start();
+        }
+
+        function createNightSound() {
+            const bufferSize = 2 * noiseContext.sampleRate;
+            const buffer = noiseContext.createBuffer(1, bufferSize, noiseContext.sampleRate);
+            const output = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                const chirp = Math.sin(i * 0.02) * Math.sin(i * 0.001) * 0.5;
+                output[i] = (Math.random() * 2 - 1) * 0.1 + chirp;
+            }
+            noiseNode = noiseContext.createBufferSource();
+            noiseNode.buffer = buffer;
+            noiseNode.loop = true;
+            const bandpass = noiseContext.createBiquadFilter();
+            bandpass.type = 'bandpass';
+            bandpass.frequency.value = 4000;
+            bandpass.Q.value = 5;
+            noiseNode.connect(bandpass);
+            bandpass.connect(noiseGain);
+            noiseNode.start();
+        }
+
+        // ========== 更新显示 ==========
+        function updateInfo() {
+            const radio = radios[currentRadioIndex];
+            trackTitle.textContent = `LoFi · ${radio.name}`;
+            trackArtist.textContent = radio.desc;
+            albumIcon.textContent = radio.icon;
+        }
+
         function updatePlayState() {
+            const isPlaying = isRadioPlaying || isAmbientPlaying;
             if (isPlaying) {
                 playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
                 player.classList.add('playing');
                 status.classList.add('playing');
-                statusText.textContent = '正在播放';
+
+                // 显示播放状态
+                const radioStatus = isRadioPlaying ? '电台播放中' : '';
+                const ambientStatus = isAmbientPlaying && currentAmbientIndex >= 0 ? ambients[currentAmbientIndex].name + '声' : '';
+                if (radioStatus && ambientStatus) {
+                    statusText.textContent = radioStatus + ' + ' + ambientStatus;
+                } else if (ambientStatus) {
+                    statusText.textContent = ambientStatus;
+                } else {
+                    statusText.textContent = '正在播放';
+                }
             } else {
                 playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
                 player.classList.remove('playing');
                 status.classList.remove('playing');
-                statusText.textContent = '已暂停';
+                statusText.textContent = '点击播放';
             }
         }
 
-        // 播放/暂停
+        // ========== 播放控制 ==========
         playBtn.onclick = () => {
-            if (isPlaying) {
-                audio.pause();
-                isPlaying = false;
+            if (isRadioPlaying || isAmbientPlaying) {
+                // 暂停所有
+                stopRadio();
+                stopAmbient();
+                updatePlayState();
             } else {
-                if (audio.src) {
-                    audio.play();
-                } else {
-                    loadAndPlay();
-                    return;
+                // 开始播放 - 如果选中了电台则播放电台，如果选中了环境音则播放环境音
+                if (currentAmbientIndex >= 0) {
+                    isAmbientPlaying = true;
+                    playAmbient(currentAmbientIndex);
                 }
-                isPlaying = true;
+                isRadioPlaying = true;
+                playRadio();
             }
-            updatePlayState();
         };
 
-        // 上一台
         prevBtn.onclick = () => {
-            currentStation = (currentStation - 1 + stations.length) % stations.length;
-            switchStation(currentStation);
+            currentRadioIndex = (currentRadioIndex - 1 + radios.length) % radios.length;
+            toggleRadio(currentRadioIndex);
         };
 
-        // 下一台
         nextBtn.onclick = () => {
-            currentStation = (currentStation + 1) % stations.length;
-            switchStation(currentStation);
+            currentRadioIndex = (currentRadioIndex + 1) % radios.length;
+            toggleRadio(currentRadioIndex);
         };
 
-        // 音量控制
+        // ========== 音量控制 ==========
         volumeSlider.oninput = (e) => {
             audio.volume = e.target.value / 100;
         };
 
-        // 进度条点击
-        progressBar.onclick = (e) => {
-            // 直播流不支持跳转，仅作UI效果
+        ambientVolumeSlider.oninput = (e) => {
+            if (noiseGain) {
+                noiseGain.gain.value = e.target.value / 100;
+            }
         };
 
-        // 监听错误
+        // ========== 错误处理 ==========
         audio.onerror = () => {
-            statusText.textContent = '加载失败，尝试其他电台';
+            statusText.textContent = '连接中...';
             status.classList.remove('playing');
-            isPlaying = false;
+            isRadioPlaying = false;
             updatePlayState();
         };
 
-        // 自动播放
-        document.addEventListener('click', function initAudio() {
-            if (!audio.src) {
-                loadAndPlay();
-                isPlaying = true;
-                updatePlayState();
-            }
-            document.removeEventListener('click', initAudio);
-        }, { once: true });
-
-        // 初始化
-        initStations();
-        updateStationInfo();
+        // ========== 初始化 ==========
+        initRadios();
+        initAmbients();
+        updateInfo();
         volumeSlider.value = 70;
+        ambientVolumeSlider.value = 30;
     </script>
 </body>
 </html>

@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "lastUpdated": 1773915490719,
+  "plugins": [
+    {
+      "filename": "frontend-design",
+      "type": "skill",
+      "metadata": {
+        "sourcePath": "frontend-design",
+        "filename": "frontend-design",
+        "name": "frontend-design",
+        "description": "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, or applications. Generates creative, polished code that avoids generic AI aesthetics.",
+        "category": "plugins",
+        "type": "skill",
+        "size": 4274,
+        "contentHash": "d39adf3a983de7dafc75991590d54f091755f7e4163d5a5ed085ecd719157184",
+        "installedAt": 1773915490718,
+        "updatedAt": 1773915490718,
+        "packageName": "frontend-design",
+        "packageVersion": "1.0.0"
+      }
+    }
+  ]
+}
